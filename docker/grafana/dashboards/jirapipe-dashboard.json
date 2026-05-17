@@ -1,0 +1,64 @@
+{
+  "dashboard": {
+    "title": "JiraPipe - Ticket Triage Pipeline",
+    "panels": [
+      {
+        "title": "Tickets Processed (Total)",
+        "type": "stat",
+        "targets": [{ "expr": "jirapipe_tickets_processed_total" }],
+        "gridPos": { "x": 0, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "title": "GPT-4o Call Rate",
+        "type": "gauge",
+        "targets": [{ "expr": "rate(jirapipe_gpt4o_calls_total[5m]) / rate(jirapipe_tickets_processed_total[5m]) * 100" }],
+        "gridPos": { "x": 6, "y": 0, "w": 6, "h": 4 },
+        "fieldConfig": { "defaults": { "max": 100, "thresholds": { "steps": [{"color": "green", "value": 0}, {"color": "yellow", "value": 35}, {"color": "red", "value": 50}] } } }
+      },
+      {
+        "title": "Cache Hit Rate",
+        "type": "gauge",
+        "targets": [{ "expr": "jirapipe_cache_hits_total / (jirapipe_cache_hits_total + jirapipe_cache_misses_total) * 100" }],
+        "gridPos": { "x": 12, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "title": "Pipeline Failures",
+        "type": "stat",
+        "targets": [{ "expr": "jirapipe_tickets_failed_total" }],
+        "gridPos": { "x": 18, "y": 0, "w": 6, "h": 4 }
+      },
+      {
+        "title": "Pipeline Latency by Source",
+        "type": "timeseries",
+        "targets": [{ "expr": "histogram_quantile(0.99, rate(jirapipe_pipeline_duration_seconds_bucket[5m]))", "legendFormat": "p99 - {{source}}" }],
+        "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Stage Latency",
+        "type": "timeseries",
+        "targets": [{ "expr": "histogram_quantile(0.95, rate(jirapipe_stage_duration_seconds_bucket[5m]))", "legendFormat": "{{stage}}" }],
+        "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 }
+      },
+      {
+        "title": "Resolution Source Distribution",
+        "type": "piechart",
+        "targets": [{ "expr": "sum by (source) (jirapipe_pipeline_duration_seconds_count)" }],
+        "gridPos": { "x": 0, "y": 12, "w": 8, "h": 6 }
+      },
+      {
+        "title": "Tickets Processed Rate",
+        "type": "timeseries",
+        "targets": [{ "expr": "rate(jirapipe_tickets_processed_total[5m])", "legendFormat": "tickets/sec" }],
+        "gridPos": { "x": 8, "y": 12, "w": 8, "h": 6 }
+      },
+      {
+        "title": "Stage Failures",
+        "type": "timeseries",
+        "targets": [{ "expr": "rate(jirapipe_stage_failures_total[5m])", "legendFormat": "{{stage}}" }],
+        "gridPos": { "x": 16, "y": 12, "w": 8, "h": 6 }
+      }
+    ],
+    "time": { "from": "now-1h", "to": "now" },
+    "refresh": "10s"
+  }
+}

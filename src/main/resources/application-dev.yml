@@ -1,0 +1,10 @@
+jirapipe:
+  mock-mode: true
+  ollama:
+    base-url: http://localhost:11434
+  openai:
+    api-key: sk-mock-dev-key
+
+logging:
+  level:
+    com.jirapipe: DEBUG
