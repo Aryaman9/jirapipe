@@ -1,5 +1,7 @@
 package com.jirapipe.ingestion;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jirapipe.pipeline.context.TicketContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -8,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -16,9 +19,11 @@ public class TicketPersistenceService {
     private static final Logger log = LoggerFactory.getLogger(TicketPersistenceService.class);
 
     private final JdbcTemplate jdbcTemplate;
+    private final ObjectMapper objectMapper;
 
-    public TicketPersistenceService(JdbcTemplate jdbcTemplate) {
+    public TicketPersistenceService(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.objectMapper = objectMapper;
     }
 
     public void saveIngestedTicket(TicketContext context) {
@@ -71,7 +76,18 @@ public class TicketPersistenceService {
             VALUES (?, ?, ?::jsonb, ?, 'PENDING')
             """,
                 context.getTicketId(), context.getJiraKey(),
-                "{\"summary\": \"" + context.getSummary() + "\"}",
+                toJsonPayload(context),
                 errorMessage);
+    }
+
+    private String toJsonPayload(TicketContext context) {
+        try {
+            return objectMapper.writeValueAsString(Map.of(
+                    "summary", context.getSummary() != null ? context.getSummary() : "",
+                    "jiraKey", context.getJiraKey() != null ? context.getJiraKey() : ""
+            ));
+        } catch (JsonProcessingException e) {
+            return "{}";
+        }
     }
 }

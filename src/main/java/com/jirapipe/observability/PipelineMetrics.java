@@ -52,10 +52,7 @@ public class PipelineMetrics {
     }
 
     public void recordStageFailure(String stageName) {
-        Counter.builder("jirapipe.stage.failures")
-                .tag("stage", stageName)
-                .register(registry)
-                .increment();
+        registry.counter("jirapipe.stage.failures", "stage", stageName).increment();
     }
 
     public void recordCacheHit() {
@@ -67,9 +64,6 @@ public class PipelineMetrics {
     }
 
     public void recordStageLatency(String stageName, Duration duration) {
-        Timer.builder("jirapipe.stage.duration")
-                .tag("stage", stageName)
-                .register(registry)
-                .record(duration);
+        registry.timer("jirapipe.stage.duration", "stage", stageName).record(duration);
     }
 }

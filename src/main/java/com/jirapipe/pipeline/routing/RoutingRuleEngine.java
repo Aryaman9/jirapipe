@@ -49,7 +49,13 @@ public class RoutingRuleEngine {
             }
             case "REGEX" -> {
                 try {
-                    yield Pattern.compile(rule.conditionValue()).matcher(ticketText).find();
+                    if (rule.conditionValue().length() > 500) {
+                        log.warn("Regex too long in rule '{}', skipping", rule.name());
+                        yield false;
+                    }
+                    yield Pattern.compile(rule.conditionValue())
+                            .matcher(ticketText.substring(0, Math.min(ticketText.length(), 10000)))
+                            .find();
                 } catch (Exception e) {
                     log.warn("Invalid regex in rule '{}': {}", rule.name(), e.getMessage());
                     yield false;

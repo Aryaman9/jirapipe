@@ -9,7 +9,9 @@ spring:
 
 jirapipe:
   ollama:
-    base-url: http://ollama:11434
+    base-url: ${OLLAMA_BASE_URL:http://ollama:11434}
+  openai:
+    base-url: ${OPENAI_BASE_URL:https://openrouter.ai/api/v1}
 
 management:
   tracing:
@@ -17,4 +19,4 @@ management:
       probability: 1.0
   otlp:
     tracing:
-      endpoint: http://jaeger:4317
+      endpoint: http://jaeger:4318/v1/traces

@@ -74,6 +74,10 @@ docker compose up -d postgres redis kafka ollama
 
 ## API Endpoints
 
+### Tickets
+- `GET /api/tickets` — List recent tickets (optional `?status=` and `?limit=` params)
+- `GET /api/tickets/{jiraKey}` — Get ticket status by JIRA key
+
 ### Webhook
 - `POST /webhook/jira` — Receive JIRA webhook events (returns 202)
 

@@ -68,6 +68,10 @@ public class OllamaService implements LlmService {
                 .retrieve()
                 .body(String.class);
 
+        if (response == null || response.isBlank()) {
+            throw new RuntimeException("Ollama returned empty response");
+        }
+
         try {
             JsonNode root = objectMapper.readTree(response);
             String generatedText = root.path("response").asText();

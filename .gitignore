@@ -10,14 +10,19 @@ target/
 .settings/
 .project
 .classpath
+*.swp
+*~
 
 # Environment
 .env
 *.env.local
+*.env.production
+start-dev.cmd
 
 # OS
 .DS_Store
 Thumbs.db
+desktop.ini
 
 # Docker volumes (local dev)
 docker/data/
@@ -25,3 +30,6 @@ docker/data/
 # Logs
 *.log
 logs/
+
+# Maven wrapper jar (keep scripts)
+!.mvn/wrapper/maven-wrapper.properties

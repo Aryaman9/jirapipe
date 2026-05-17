@@ -3,10 +3,12 @@ apiVersion: 1
 providers:
   - name: 'JiraPipe'
     orgId: 1
-    folder: ''
+    folder: 'JiraPipe'
     type: file
     disableDeletion: false
     editable: true
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
     options:
       path: /etc/grafana/provisioning/dashboards
       foldersFromFilesStructure: false

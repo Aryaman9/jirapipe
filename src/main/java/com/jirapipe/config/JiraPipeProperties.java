@@ -47,12 +47,15 @@ public class JiraPipeProperties {
     }
 
     public static class OpenAiProperties {
+        private String baseUrl = "https://openrouter.ai/api/v1";
         private String apiKey = "";
         private String embeddingModel = "text-embedding-3-small";
         private String completionModel = "gpt-4o";
         private String timeout = "60s";
         private int maxTokens = 2048;
 
+        public String getBaseUrl() { return baseUrl; }
+        public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
         public String getApiKey() { return apiKey; }
         public void setApiKey(String apiKey) { this.apiKey = apiKey; }
         public String getEmbeddingModel() { return embeddingModel; }

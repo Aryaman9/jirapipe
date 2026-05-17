@@ -28,7 +28,7 @@ public class OpenAiEmbeddingService implements EmbeddingService {
         this.objectMapper = objectMapper;
         this.model = properties.getOpenai().getEmbeddingModel();
         this.restClient = RestClient.builder()
-                .baseUrl("https://api.openai.com/v1")
+                .baseUrl(properties.getOpenai().getBaseUrl())
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "Bearer " + properties.getOpenai().getApiKey())
                 .defaultHeader(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
                 .build();
