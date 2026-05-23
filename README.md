@@ -139,35 +139,84 @@ jirapipe:
 | `JIRA_API_TOKEN` | For prod | JIRA API token |
 | `JIRA_WEBHOOK_SECRET` | Optional | HMAC webhook validation secret |
 
+## Project Structure
+
+```
+jirapipe/
+├── src/main/java/com/jirapipe/
+│   ├── JiraPipeApplication.java          # Entry point (@EnableAsync)
+│   ├── config/                           # Spring config, properties, Kafka, OpenAPI
+│   ├── webhook/                          # JIRA webhook controller + HMAC validation
+│   ├── ingestion/                        # Kafka producer/consumer, persistence
+│   ├── pipeline/
+│   │   ├── TriagePipeline.java           # Core orchestrator
+│   │   ├── stage/                        # Ordered pipeline stages (50→100→200→300)
+│   │   ├── context/                      # TicketContext, TicketSignals, StageResult
+│   │   └── routing/                      # DB-driven routing rule engine
+│   ├── embedding/                        # OpenAI embeddings + Redis cache decorator
+│   ├── vectorstore/                      # pgvector HNSW similarity search
+│   ├── llm/                              # Ollama (extraction) + OpenAI (resolution)
+│   ├── jira/                             # JIRA REST client + mock
+│   ├── feedback/                         # Feedback loop controller + service
+│   ├── admin/                            # Stats, rules CRUD, DLQ, backfill, tickets
+│   ├── health/                           # Custom Actuator health indicators
+│   └── observability/                    # Micrometer metrics (counters, timers)
+├── src/main/resources/
+│   ├── application.yml                   # Central config
+│   ├── application-dev.yml               # Mock mode (no external APIs)
+│   ├── application-docker.yml            # Docker internal hostnames
+│   └── db/migration/V1-V6.sql           # Flyway schema migrations
+├── src/test/java/com/jirapipe/
+│   ├── unit/                             # 9 unit tests (routing, pipeline, webhook)
+│   └── integration/                      # TestContainers integration tests
+├── docker/
+│   ├── prometheus/prometheus.yml         # Scrape config
+│   └── grafana/                          # Dashboard + datasource provisioning
+├── docker-compose.yml                    # 9 services (infra + app + observability)
+├── Dockerfile                            # Multi-stage build (Maven → JRE 21)
+└── pom.xml                               # Dependencies + profiles
+```
+
+## Database Schema
+
+| Table | Purpose |
+|-------|---------|
+| `tickets` | Ticket metadata + pipeline status |
+| `ticket_embeddings` | vector(1536) with HNSW cosine index |
+| `resolutions` | Generated resolutions linked to tickets |
+| `feedback` | Engineer ratings (1-5) with comments |
+| `dead_letter_queue` | Failed payloads with retry state |
+| `routing_rules` | Configurable rule definitions |
+
 ## Testing
 
 ```bash
-# Unit tests
+# Unit tests (9 tests)
 ./mvnw test
 
 # Integration tests (requires Docker)
-./mvnw verify -P integration
+./mvnw test -P integration
 
 # Send test webhook
 curl -X POST http://localhost:8080/webhook/jira \
   -H "Content-Type: application/json" \
   -d '{
     "webhookEvent": "jira:issue_created",
-    "timestamp": 1700000000000,
     "issue": {
-      "id": "10001",
       "key": "PROJ-123",
       "fields": {
         "summary": "Production API returning 500 errors",
-        "description": "The /api/users endpoint is returning 500 errors since the last deployment",
+        "description": "The /api/users endpoint is returning 500 errors",
         "priority": {"name": "High"},
-        "status": {"name": "Open"},
         "issuetype": {"name": "Bug"},
         "labels": ["production", "api"],
-        "project": {"key": "PROJ", "name": "Project"},
-        "created": "2024-01-15T10:00:00Z",
-        "updated": "2024-01-15T10:00:00Z"
+        "project": {"key": "PROJ"},
+        "created": "2024-01-15T10:00:00Z"
       }
     }
   }'
 ```
+
+## License
+
+MIT
